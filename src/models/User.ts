@@ -1,7 +1,8 @@
-import mongoose, { Document, Schema } from 'mongoose';
+import mongoose, { Document, Schema, Types} from 'mongoose';
 import bcrypt from 'bcryptjs';
 
 export interface IUser extends Document {
+  _id: Types.ObjectId
   username: string;
   email: string;
   password: string;
@@ -19,7 +20,7 @@ const UserSchema: Schema = new Schema({
   username: {
     type: String,
     required: [true, 'El nombre de usuario es requerido'],
-    unique: true,
+    unique: true, // Esto ya crea un índice automáticamente
     trim: true,
     minlength: [3, 'El usuario debe tener al menos 3 caracteres'],
     maxlength: [30, 'El usuario no puede tener más de 30 caracteres'],
@@ -28,7 +29,7 @@ const UserSchema: Schema = new Schema({
   email: {
     type: String,
     required: [true, 'El email es requerido'],
-    unique: true,
+    unique: true, // Esto ya crea un índice automáticamente
     lowercase: true,
     trim: true,
     match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Por favor ingresa un email válido']
@@ -37,7 +38,7 @@ const UserSchema: Schema = new Schema({
     type: String,
     required: [true, 'La contraseña es requerida'],
     minlength: [6, 'La contraseña debe tener al menos 6 caracteres'],
-    select: false // No incluir en consultas por defecto
+    select: false
   },
   preferences: {
     favoriteGenres: {
@@ -78,9 +79,8 @@ UserSchema.methods.comparePassword = async function(candidatePassword: string): 
   return await bcrypt.compare(candidatePassword, this.password);
 };
 
-// Índices
-UserSchema.index({ email: 1 });
-UserSchema.index({ username: 1 });
+
 UserSchema.index({ 'preferences.favoriteGenres': 1 });
+
 
 export default mongoose.model<IUser>('User', UserSchema);
