@@ -1,6 +1,7 @@
 import { Response } from 'express';
 import { BookService } from '../services/bookService';
 import { AuthRequest } from '../types/auth';
+import { RecommendationService } from '../services/recommendationService';
 
 /**
  * Función helper para convertir query params a tipos correctos
@@ -169,6 +170,39 @@ export const getAuthors = async (req: AuthRequest, res: Response): Promise<void>
 
   } catch (error) {
     console.error('Error en controlador de autores:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error interno del servidor'
+    });
+  }
+};
+
+/**
+ * Controlador para obtener libros similares (alias de recomendaciones por contenido)
+ */
+export const getSimilarBooks = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const { limit = '6' } = req.query;
+
+    if (!id) {
+      res.status(400).json({
+        success: false,
+        message: 'ID de libro requerido'
+      });
+      return;
+    }
+
+    // Usar el servicio de recomendaciones para obtener libros similares
+    const response = await RecommendationService.getContentBasedRecommendations({
+      bookId: id,
+      limit: parseInt(String(limit), 10)
+    });
+
+    res.status(response.success ? 200 : 400).json(response);
+
+  } catch (error) {
+    console.error('Error en controlador de libros similares:', error);
     res.status(500).json({
       success: false,
       message: 'Error interno del servidor'
