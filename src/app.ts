@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import connectDB from './config/database';
 import authRoutes from './routes/authRoutes';
+import routes from './routes';
 import mongoose from 'mongoose';
 
 // Configurar variables de entorno
@@ -30,31 +31,18 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
+  next();
+});
+
 // Rutas
-app.use('/api/auth', authRoutes);
+app.use('/api', routes);
 
-// Ruta de prueba
-app.get('/', (req, res) => {
-  res.json({
-    message: '🚀 Servidor de autenticación funcionando con MongoDB Atlas',
-    database: 'MongoDB Atlas',
-    timestamp: new Date().toISOString()
-  });
-});
-
-app.get('/health', (req, res) => {
-  const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
-  
-  res.json({
-    status: 'OK',
-    database: dbStatus,
-    timestamp: new Date().toISOString()
-  });
-});
-
-
+// Manejo de errores global
 app.use((error: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  console.error('Error:', error);
+  console.error('Error global:', error);
+  
   res.status(500).json({
     success: false,
     message: 'Error interno del servidor',
