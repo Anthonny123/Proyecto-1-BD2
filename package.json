@@ -7,6 +7,7 @@
     "start": "node dist/app.js",
     "dev": "ts-node-dev --respawn --transpile-only src/app.ts",
     "clean": "rm -rf dist",
+    "populate:books": "ts-node src/scripts/populateBooks.ts",
     "rebuild": "npm run clean && npm run build"
   }
 ,
